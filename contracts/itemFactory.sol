@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./common/ERC1155SupplyCC.sol";
+import "./Milk.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract ItemFactory is ERC1155SupplyCC, AccessControl {
@@ -20,6 +21,11 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
     uint16 public _rareRoll = 90;
     uint16 public _epicRoll = 98;
     uint16 public _legendaryRoll = 100;
+
+
+    enum EType {
+        BOX, MILK
+    }
 
     enum ERarity {
         COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
@@ -76,7 +82,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
             );
 
             // do some bit shifting magic to create random min max
-            uint256 rewardAmount = lootData.min + (randomNum(entropy)) % (lootData.max - lootData.min + 1);
+            uint256 rewardAmount = min + (randomNum(entropy)) % (max - min + 1);
 
             // Give a MILK reward
             if (rewardType == uint256(EType.MILK)) {
@@ -87,9 +93,9 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
 
             // Give an item reward
             else {
-                uint256 index = (randomNum(entropy)) % lootData.ids.length;
-                _mint(claimer, lootData.ids[index], rewardAmount, "");
-                rewardData = abi.encode(lootData.ids[index], rewardAmount);
+                uint256 index = (randomNum(entropy)) % ids.length;
+                _mint(claimer, ids[index], rewardAmount, "");
+                rewardData = abi.encode(ids[index], rewardAmount);
             }
         }
 
