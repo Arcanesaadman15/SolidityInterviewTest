@@ -15,12 +15,17 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
 
     address public _milkContractAddress;
 
+
+  //@dev Used to log claim event for user returning claimed and reward data
+  event LogDailyClaim(address indexed _claimer,uint256 indexed _rewardType,uint256 indexed _rewardRarity,bytes _rewardData);
+
     /// @dev Rarity rolls
     uint16 public _commonRoll = 60;
     uint16 public _uncommonRoll = 80;
     uint16 public _rareRoll = 90;
     uint16 public _epicRoll = 98;
     uint16 public _legendaryRoll = 100;
+    uint16 public _maxRarityRoll = 100;
 
 
     enum EType {
@@ -39,7 +44,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
         _milkContractAddress = milkContractAddress;
     }
 
-    function claim(address claimer, uint256 entropy) external {
+    function claim(address claimer, uint256 entropy, uint petTokenId) external {
 
         // generate a single random number and bit shift as needed
         uint256 randomNumber = randomNum(entropy);
