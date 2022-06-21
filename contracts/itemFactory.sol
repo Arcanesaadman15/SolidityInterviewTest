@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract ItemFactory is ERC1155SupplyCC, AccessControl {
 
+
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     /// @dev Track last time a claim was made for a specific pet
     mapping(uint256 => uint256) public _lastUpdate;
 
@@ -33,10 +36,10 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
     function claim(address claimer, uint256 entropy) external {
 
         // generate a single random number and bit shift as needed
-        uint256 randomNum = randomNum(entropy);
+        uint256 randomNumber = randomNum(entropy);
 
         // roll and pick the rarity level of the reward
-        uint256 randRarity = randomNum % _legendaryRoll;
+        uint256 randRarity = randomNumber % _legendaryRoll;
         uint256 rewardRarity;
         bytes memory rewardData;
         uint256 rewardType = uint256(EType.BOX);
@@ -96,7 +99,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
         _lastUpdate[petTokenId] = block.timestamp;
     }
 
-    function randomNum(uint entropy) internal returns (uint256) {
+    function randomNum(uint entropy) internal view returns (uint256) {
         return uint256(keccak256(abi.encode(block.timestamp, block.difficulty, entropy)));
     }
 

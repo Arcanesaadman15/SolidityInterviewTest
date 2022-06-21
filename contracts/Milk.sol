@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 contract Milk is ERC20, AccessControl {
 
     bytes32 public constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
+    bytes32 public constant CONTRACT_ROLE = keccak256("CONTRACT_ROLE");
+    bytes32 public constant MASTER_ROLE = keccak256("MASTER_ROLE");
 
     constructor(
         string memory name,
