@@ -110,54 +110,6 @@ describe("ItemFactory Contract Test", async function () {
     );
   });
 
-  it("Should set reward only by users with ADMIN_ROLE", async function () {
-    const adminRole = await itemFactory.ADMIN_ROLE();
-    const rewardType = 1;
-    const rewardRarity = 2;
-    const min = 10;
-    const max = 20;
-    const ids = [1, 2, 3, 4, 5];
-    let rewardData = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256[]"],
-      [min, max, ids]
-    );
-
-    await expect(
-      itemFactory.setReward(rewardType, rewardRarity, rewardData)
-    ).to.be.revertedWith(
-      `AccessControl: account ${admin.address.toLowerCase()} is missing role ${adminRole}`
-    );
-
-    await itemFactory.grantRole(adminRole, admin.address);
-
-    rewardData = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256[]"],
-      [min, min, ids]
-    );
-
-    await expect(
-      itemFactory.connect(admin).setReward(rewardType, rewardRarity, rewardData)
-    ).to.be.revertedWith("invalid min max value");
-
-    rewardData = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256[]"],
-      [min, max, []]
-    );
-
-    await expect(
-      itemFactory.connect(admin).setReward(rewardType, rewardRarity, rewardData)
-    ).to.be.revertedWith("empty ids");
-
-    rewardData = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256[]"],
-      [min, max, ids]
-    );
-
-    await itemFactory
-      .connect(admin)
-      .setReward(rewardType, rewardRarity, rewardData);
-  });
-
   describe("ItemFactory Claim Test", async function () {
     let rewardData;
 

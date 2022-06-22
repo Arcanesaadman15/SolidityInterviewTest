@@ -44,9 +44,15 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
         _milkContractAddress = milkContractAddress;
     }
 
+    /// @notice called to claim milk or items by user
+    /// Should handle mint milk or items based on randomness
+    /// @param claimer user address who is claiming
+    /// @param entropy used to generate random value
     function claim(address claimer, uint256 entropy) external {
+
+        // can only be claimed if called by account owner
+        require(claimer == msg.sender);
          
-        
         // generate a single random number and bit shift as needed
         uint256 randomNumber = randomNum(entropy);
 
@@ -114,6 +120,11 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
         _lastUpdate[claimer] = block.timestamp;
     }
 
+
+
+    /// @notice called to genrate random number
+    /// @dev This function is not fully secure and could be gamed
+    /// @param entropy user address for whom deposit is being done
     function randomNum(uint entropy) internal view returns (uint256) {
         return uint256(keccak256(abi.encode(block.timestamp, block.difficulty, entropy)));
     }
@@ -149,13 +160,22 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
         _legendaryRoll = legendary;
         _maxRarityRoll = maxRoll;
     }
-
+    
+    /// @notice called by admin to set the reward data
+    /// @dev Should only be called by addresses with admin roles
+    /// @param rewardType type of reward 
+    /// @param rewardRarity rarity between common to max 
+    /// @param  rewardData abi encoded amount
     function setReward(uint256 rewardType, uint256 rewardRarity, bytes calldata rewardData) external onlyRole(ADMIN_ROLE) {
+        (uint256 min, uint256 max,) = abi.decode(
+        rewardData, (uint256, uint256, uint256[])
+        );
+        require(max > min, "Min cannot be over max");
         _rewardMapping[rewardType][rewardRarity] = rewardData;
 
     }
 
-
+     /// @notice needed to override supportsInterface function in the parent contract
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
