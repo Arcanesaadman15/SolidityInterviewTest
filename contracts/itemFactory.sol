@@ -11,7 +11,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /// @dev Track last time a claim was made for a specific pet
-    mapping(uint256 => uint256) public _lastUpdate;
+    mapping(address => uint256) public _lastUpdate;
 
     address public _milkContractAddress;
 
@@ -29,7 +29,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
 
 
     enum EType {
-        BOX, MILK
+        MILK, BOX
     }
 
     enum ERarity {
@@ -39,13 +39,14 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
     /// @dev rewardType => (rewardRarity => data)
     mapping(uint256 => mapping(uint256 => bytes)) _rewardMapping;
 
-    constructor(string memory uri, address milkContractAddress) {
+    constructor(string memory uri, address milkContractAddress) ERC1155(uri)  {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _milkContractAddress = milkContractAddress;
     }
 
-    function claim(address claimer, uint256 entropy, uint petTokenId) external {
-
+    function claim(address claimer, uint256 entropy) external {
+         
+        
         // generate a single random number and bit shift as needed
         uint256 randomNumber = randomNum(entropy);
 
@@ -79,7 +80,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
         else {
             // This will pick a random number between 0 and 1 inc.
             // MILK or ITEMS.
-            rewardType = randomNum(entropy) % uint256(EType.BOX);
+             rewardType = randomNumber % (uint256(EType.BOX) + 1);
 
             // convert the reward mapping data to min and max
             (uint256 min, uint256 max, uint256[] memory ids) = abi.decode(
@@ -104,10 +105,13 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
             }
         }
 
+        require(_lastUpdate[claimer] + 60 * 60 * 24 <= block.timestamp, "can claim once a day");
+
+
         emit LogDailyClaim(claimer, rewardType, rewardRarity, rewardData);
 
         // Claims are specific to the that pet, not the claimer or a combination of claimer and pet
-        _lastUpdate[petTokenId] = block.timestamp;
+        _lastUpdate[claimer] = block.timestamp;
     }
 
     function randomNum(uint entropy) internal view returns (uint256) {
@@ -147,9 +151,12 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
     }
 
     function setReward(uint256 rewardType, uint256 rewardRarity, bytes calldata rewardData) external onlyRole(ADMIN_ROLE) {
-        (uint256 min, uint256 max, uint256[] memory ids) = abi.decode(
-            rewardData, (uint256, uint256, uint256[])
-        );
         _rewardMapping[rewardType][rewardRarity] = rewardData;
+
+    }
+
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 }
