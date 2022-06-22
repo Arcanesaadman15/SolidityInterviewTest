@@ -1,20 +1,11 @@
-# Cool Cats Solidity Test
+# Cool Cats Solidity Test Attempt
 
-This repo contains a number of mistakes and places where improvements can be made. Please made any adjustments you see fit.
-We have deliberately made some very silly mistakes and simple things like file names might be wrong or inconsistent.
+This repo contains an attempt at the cool cats solidity test
+
 
 ### ERC1155SupplyCC
 
 Why was this file used and not used directly from the OpenZeppling library?
 
-### Claim()
-
-Please adjust the claim function so that an address can only claim once per day.
-
-## Unit Tests
-
-At Cool Cats we write unit tests for 100% coverage and for as many edge cases as we can think of. Please do the same here.
-
-## Deployment Script/Task
-
-Please create a deployment script or task. Which ever you feel is most appropriate
+Answer: The SupplyCC extension is used to create a ERC1155 compatible contract that can
+used to keep track of the totalsupply of a token minted via ERC1155 or whether there is any supply at all of said token
